@@ -1,0 +1,700 @@
+%# ShareLatex 用疑似 ipsj クラス (Technical report) エミュレータ．
+%# 使い方 
+%#  \documentclass[submit,techreq,noauthor]{ipsj} をコメントアウトする．
+%# 代わりに以下を記述する．
+%#  \documentclass[a4paper]{article}
+%#  \usepackage{ipsj}
+%# フォントファイル (*.ttf) も忘れずにアップロードすること． 
+%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                          %
+% ！ 提出時は必ず学会提供クラスファイルを用いてコンパイルしてください ！   %
+%                                                                          %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%
+% 免責：
+%  本スタイルファイルを用いたことによるいかなる損害についてもその責を負いません．
+%  自己責任にてご使用ください．
+%  
+%  また，スタイルの正確性は保証していません．
+%
+%
+% Copyright(c) 2015-2016, Optical Media Interface laboratory, NAIST.
+%   maintained by Kenichiro Tanaka.
+%
+
+
+\usepackage{fontspec}
+%\usepackage{zxjatype}
+%\usepackage[ipa-dx]{zxjafont} %% Change fonts depending on your environment.
+%\usepackage[ms-dx]{zxjafont}
+%\usepackage[hiragino-dx]{zxjafont}
+\usepackage{xeCJK}
+\setCJKmainfont{ipamjm.ttf}
+\setCJKsansfont{ipag.ttf} 
+% \setCJKmonofont{hogehoge_mono.otf}
+
+
+\usepackage{color}
+
+% カウンタ
+\newcounter{巻数}
+\newcounter{号数}
+
+\newcount\author@count
+\newcount\label@count
+\newcount\email@count
+\newcount\affiliate@count
+\newcount\offsetemail
+\newcount\paffiliate@count
+
+
+%%%%%%%%%%%%%%%%%%%%
+%
+% 余白設定
+%
+%%%%%%%%%%%%%%%%%%%%
+
+%\setlength{\topmargin}{22mm}
+\usepackage[top=22truemm,bottom=25truemm,left=17truemm,right=17truemm]{geometry}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% タイトル・著者・アブスト
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def\author#1#2#3{%
+\@ifnextchar[%
+{\@author{#1}{#2}{#3}}
+{\@author{#1}{#2}{#3}[]}
+}
+\def\@author#1#2#3[#4]{%
+ \advance\author@count\@ne
+\expandafter\def\csname authorname\the\author@count\endcsname{#1}
+%%
+\expandafter\def\csname eauthorname\the\author@count\endcsname{#2}
+%%
+\edef\@labellist{\zap@space#3 \@empty}
+\@for\@temp:=\@labellist\do{%
+ \advance\label@count\@ne
+\expandafter\edef\csname authorlabel\the\author@count @\the\label@count\endcsname{\@temp}}
+\expandafter\edef\csname authorlabel@num@\the\author@count \endcsname{\the\label@count}
+\label@count\z@
+%%
+\def\_{\leavevmode \kern.06em\vbox{\hrule\@width.3em}}%%%!!!!
+\edef\@emaillist{\zap@space#4 \@empty}
+\@for\@temp:=\@emaillist\do{%
+ \advance\email@count\@ne
+\expandafter\edef\csname authoremail\the\author@count @\the\email@count\endcsname{\@temp}}
+\expandafter\edef\csname authoremail@num@\the\author@count \endcsname{\the\email@count}
+\email@count\z@
+}
+
+% \affiliate への対応
+\def\affiliate#1#2{%
+%\expandafter\def\csname affiliate@#1\endcsname{#2}
+\advance\affiliate@count\@ne
+\expandafter\edef\csname affiliate@num@#1\endcsname{\the\affiliate@count}%
+%\typeout{>>>>>>\csname affiliate@1\endcsname}
+\expandafter\def\csname affiliate@\the\affiliate@count\endcsname{#2}%
+}
+
+
+\def\paffiliate#1#2{%
+%\advance\affiliate@count\@ne
+\advance\paffiliate@count\@ne
+\expandafter\edef\csname paffiliate@num@#1\endcsname{$\dagger$\the\paffiliate@count}%
+\expandafter\def\csname paffiliate@\the\paffiliate@count\endcsname{#2}%
+}
+
+
+\def\authoroutput#1{%
+%\begin{center}
+\bgroup
+\offsetemail\z@
+\count@\@ne
+\advance\author@count\@ne
+%%%
+%%%
+%%%
+\@whilenum{\count@<\author@count}\do{%
+\mbox{% start
+%
+%% \csname #1authorfont\endcsname%% !! font
+%
+\csname #1authorname\the\count@\endcsname %\csname affiliate@num@\endcsname
+%%%%%label
+\null{}%
+\expandafter\@tempcnta\csname authorlabel@num@\the\count@\endcsname
+   \advance\@tempcnta\@ne
+   \@tempcntb\@ne
+{%
+   \@whilenum{\@tempcntb<\@tempcnta}\do{%
+      \edef\temp{\csname authorlabel\the\count@ @\the\@tempcntb\endcsname}%
+      \textsuperscript{\csname #1labelfont\endcsname%% !! font
+%%%change from here
+%%%add paffiliate
+         \expandafter\if\csname affiliate@num@\temp\endcsname\relax
+            \csname paffiliate@num@\temp\endcsname%%affiliate
+         \else
+            \csname affiliate@num@\temp\endcsname
+         \fi
+%%%end
+         \comma@or@relax@affilabel}%
+      \advance\@tempcntb\@ne
+}%
+}%
+%%%%%%email
+\expandafter\@tempcnta\csname authoremail@num@\the\count@\endcsname\relax
+   \ifnum\@tempcnta=\z@\relax\else\textsuperscript{,}\fi
+   \advance\@tempcnta\@ne
+   \@tempcntb\@ne
+   \@whilenum{\@tempcntb<\@tempcnta}\do{%
+         %\textsuperscript{\space}%
+      \bgroup
+         \advance\@tempcntb\offsetemail
+         \textsuperscript{\csname #1labelfont\endcsname%% !! font
+            \@alph{\@tempcntb}\rparen\comma@or@relax@email}%
+      \egroup
+      \advance\@tempcntb\@ne
+   }%
+\advance\@tempcntb-1\relax
+\global\advance\offsetemail\@tempcntb
+%
+}%% end
+%%
+\csname #1break@or@oneskip\endcsname
+%%
+\advance\count@\@ne
+%%%
+}%
+%%%%%%
+%\end{center}%
+\egroup
+}
+
+
+
+\def\breakauthorline#1{%
+   \edef\temp@break{\zap@space#1 \@empty}
+   \@for\@temp:=\temp@break\do{%
+      \expandafter\def\csname break@\@temp\endcsname{\\}%
+   }%
+}
+
+\def\breakeauthorline#1{%
+   \edef\temp@break{\zap@space#1 \@empty}
+   \@for\@temp:=\temp@break\do{%
+      \expandafter\def\csname ebreak@\@temp\endcsname{\\}%
+   }%
+}
+
+\def\break@or@oneskip{%
+   \expandafter\ifx\csname break@\the\count@\endcsname\relax
+      \csname break@\the\count@\endcsname
+}
+
+\def\ebreak@or@oneskip{%
+   \expandafter\ifx\csname ebreak@\the\count@\endcsname\relax
+      \csname ebreak@\the\count@\endcsname
+}
+
+
+%%(
+\def\rparen{)}%%
+
+
+
+\def\comma@or@relax@affilabel{%
+   \bgroup
+   \count@\@tempcnta
+   \advance\count@\m@ne
+   \ifnum\count@=\@tempcntb
+      \relax
+   \else
+      ,%\space
+   \fi
+   \egroup
+}
+
+\def\comma@or@relax@email{%
+   \bgroup
+   \count@\@tempcnta
+   \advance\count@\m@ne
+   \advance\@tempcntb-\offsetemail
+   \ifnum\count@=\@tempcntb
+      \relax
+   \else
+      ,%\space
+   \fi
+   \egroup
+}
+
+%=============
+% maketitle
+%=============
+
+\def\maketitle{\par
+  \begingroup
+    \renewcommand{\thefootnote}{\fnsymbol{footnote}}%
+    \def\@makefnmark{\hbox{\ifydir $\m@th^{\@thefnmark}$
+      \else\hbox{\yoko$\m@th^{\@thefnmark}$}\fi}}%
+     \long\def\@makefntext##1{\parindent 1em\noindent
+       \hbox to1.8em{\hss$\m@th^{\@thefnmark}$}##1}%
+      \twocolumn[\@maketitle]%
+     %\thispagestyle{IPSJTITLEheadings}
+\@thanks
+  \endgroup
+  \setcounter{footnote}{0}%
+  \global\let\thanks\relax
+  \global\let\maketitle\relax
+  \global\let\p@thanks\relax
+  \global\let\@thanks\@empty
+  \global\let\@author\@empty
+  \global\let\@eauthor\@empty
+  \global\let\@date\@empty
+  \global\let\@title\@empty
+  \global\let\title\relax
+  \global\let\@etitle\@empty
+  \global\let\etitle\relax
+%%%
+  \global\let\author\relax
+  \global\let\eauthor\relax
+  \global\let\date\relax
+  \global\let\and\relax
+%%%
+% affiliate
+%%%
+\bgroup
+\setcounter{footnote}{0}
+\def\thefootnote{\@arabic{\c@footnote}\protect\hphantom{\rparen}}
+\advance\affiliate@count\@ne
+\count@\@ne
+\@whilenum{\count@<\affiliate@count}\do{%
+   \refstepcounter{footnote}
+   \footnotetext{\csname affiliate@\the\count@\endcsname}%
+   \advance\count@\@ne
+}%
+\egroup
+%%%
+% paffiliate
+%%%
+\bgroup
+\setcounter{footnote}{0}
+\def\thefootnote{$\dagger$\@arabic{\c@footnote}\protect\hphantom{\rparen}}
+\advance\paffiliate@count\@ne
+\count@\@ne
+\@whilenum{\count@<\paffiliate@count}\do{%
+   \refstepcounter{footnote}
+%%%%
+  \footnotetext{%
+\def\\{\newline Presently with \ignorespaces}%
+現在，\csname paffiliate@\the\count@\endcsname}%
+   \advance\count@\@ne
+}%
+\egroup
+%%%
+%=====
+% email
+%=====
+\bgroup
+\setcounter{footnote}{0}
+\def\thefootnote{\@alph{\c@footnote}\rparen}
+\count@\@ne
+\advance\author@count\@ne
+   \@whilenum{\count@<\author@count}\do{%
+      \expandafter\@tempcntb\csname authoremail@num@\the\count@ \endcsname      
+      \advance\@tempcntb\@ne
+      \@tempcnta\@ne
+      \@whilenum{\@tempcnta<\@tempcntb}\do{%
+      \refstepcounter{footnote}
+      \footnotetext{\csname authoremail\the\count@ @\the\@tempcnta\endcsname}%
+      \advance\@tempcnta\@ne
+      }%
+   \advance\count@\@ne
+   }%
+\egroup
+%=================
+\setcounter{footnote}{0}
+  }
+%%%
+
+
+%================
+% @maketitle
+%================
+
+%%
+\newskip\shubetutitlesep 
+\newskip\JEhonbunsep
+
+\shubetutitlesep=6.2mm% default 10mm
+\JEhonbunsep=13.7mm % default 15mm
+
+\newskip\Etitleauthorsep 
+\newskip\Eauthorreceivesep
+\newskip\Ereceiveabstsep
+\newskip\Eabstkeywordsep
+
+\Etitleauthorsep=10mm% default 12.5mm
+\Eauthorreceivesep=5.5mm% default 7mm
+\Ereceiveabstsep=2.5mm% default 6mm
+\Eabstkeywordsep=4mm % default 5mm
+
+%
+\newskip\Jtitlejauthorsep 
+\newskip\Jauthorjreceivesep
+\newskip\Jreceivejabstsep
+\newskip\Jabstsepjkeyword
+\newskip\Jkeywordetitle
+\newskip\Jetitleeauthor
+\newskip\Jeauthorereceivesep
+\newskip\Jereceiveeabstsep
+\newskip\Jeabstekeywordsep
+\newskip\zw
+\newskip\h
+
+\Jtitlejauthorsep=9mm% default 10mm
+\Jauthorjreceivesep=6.5mm% default 7mm
+\Jreceivejabstsep=2.5mm% default 5mm
+\Jabstsepjkeyword=5.5mm % default 5mm
+\Jkeywordetitle=14.2mm % default 16mm
+\Jetitleeauthor=5.5mm% default 7mm
+\Jeauthorereceivesep=5.5mm% default 6.5mm
+\Jereceiveeabstsep=1.5mm% default 4.5mm
+\Jeabstekeywordsep=5mm % default 5mm
+\zw=3mm
+\h=0.25mm
+
+
+
+\def\@maketitle{%
+\newpage\null
+%%%%%%%%%%%%%%%%%%%%%%%%
+\vskip\shubetutitlesep% 
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%\vskip 10mm%
+\begin{center}
+\authortitle %%<---
+\end{center}
+%%%%%%%%%%%%%%%%%%%
+%
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\authortitle{%
+\vskip8mm
+{\fontsize{20}{24}\selectfont \textsf{{\@title}}\par}%
+%%%%%%%%%%%%%%%%%%%%%%%%
+\vskip\Jtitlejauthorsep%
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% author
+%======
+{\fontsize{12}{16}\selectfont \authoroutput{}\par}%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\vskip\Jauthorjreceivesep%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%======
+%{{\@uketsuke}\par}%
+\vskip3mm
+%%%%%%%%%%%%%%%%%%%%%%%%
+\vskip\Jreceivejabstsep%
+%%%%%%%%%%%%%%%%%%%%%%%%
+\mbox{\box\@abstractbox}\par%
+%%%%%%%%%%%%%%%%%%%
+\vskip\JEhonbunsep%
+%%%%%%%%%%%%%%%%%%%
+}
+
+
+\newbox\@abstractbox
+
+\def\abstract{%
+ \global\setbox\@abstractbox\hbox\bgroup%
+  \begin{minipage}[t]{.8\textwidth}% 12Q 18H
+\fontsize{8.5}{13}\selectfont%
+\noindent{\textsf{概要}：}%
+\ignorespaces}
+
+\def\endabstract{%
+\par%
+\end{minipage}%
+\egroup\ignorespaces}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% フォント設定
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% 本文設定
+\renewcommand{\normalsize}{\fontsize{9pt}{15pt}\selectfont}
+\normalsize
+
+% セクションフォント
+% TODO: subsection の下の余白がでかい．
+\usepackage{sectsty}
+\sectionfont{\sffamily \fontsize{11}{15}\selectfont}
+\subsectionfont{\sffamily \fontsize{9}{0}\selectfont}
+\subsubsectionfont{\sffamily \fontsize{9}{0}\selectfont}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% ヘッダー・フッター
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ヘッダー・フッター
+% TODO: 上部の線の消し方
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+{
+\lhead{\fontsize{9pt}{15pt}\selectfont \textsf{情報処理学会研究報告}\\\fontsize{8pt}{15pt}\selectfont IPSJ SIG Technical Report} % 9pt
+\rhead{\fontsize{9pt}{15pt}\selectfont \textsf{\textcolor{red}{XeLaTeX用疑似スタイル\\提出時は学会提供クラスファイルを使用してください}}}
+\chead{}
+\lfoot{\fontsize{8pt}{0}\selectfont \copyright~2016 Information Processing Society of Japan. } % 8pt
+\rfoot{\fontsize{8pt}{0}\selectfont \thepage} % 8pt
+\cfoot{}
+\renewcommand{\headrulewidth}{0}
+\renewcommand{\footrulewidth}{0}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Figure, Table 環境
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TODO: Caption の位置とフォント．
+\renewcommand{\figurename}{\textsf{図}}
+\renewcommand{\tablename}{\textsf{表}}
+
+\renewcommand{\thefigure}{\@arabic\c@figure}
+\def\fps@figure{tbp}
+\def\ftype@figure{1}
+\def\ext@figure{lof}
+\def\fnum@figure{\figurename~\thefigure}
+\def\fnum@efigure{Fig.~\thefigure}
+\renewenvironment{figure}
+               {\@floatenv
+%                \if@tecrep
+\capwidth\hsize\ecapwidth\hsize
+%\else
+%\capwidth65mm\ecapwidth65mm
+%\fi
+                \abovecaptionskip1mm\belowcaptionskip\z@\@float{figure}}
+               {\end@float}
+\renewenvironment{figure*}
+               {\@floatenv\capwidth.66\textwidth\ecapwidth.66\textwidth
+                \abovecaptionskip1mm\belowcaptionskip\z@\@dblfloat{figure}}
+               {\end@dblfloat}
+
+\renewcommand{\thetable}{\@arabic\c@table}
+\def\fps@table{tbp}
+\def\ftype@table{2}
+\def\ext@table{lot}
+\def\fnum@table{\tablename~\thetable}
+\def\fnum@etable{Table~\thetable}
+\renewenvironment{table}
+               {\@floatenv
+%                \if@tecrep
+\capwidth\hsize\ecapwidth\hsize
+%\else
+%\capwidth65mm\ecapwidth65mm
+%\fi
+                \abovecaptionskip\z@\belowcaptionskip1mm\@float{table}}
+               {\end@float}
+\renewenvironment{table*}
+               {\@floatenv\capwidth.66\textwidth\ecapwidth.66\textwidth
+                \abovecaptionskip\z@\belowcaptionskip1mm\@dblfloat{table}}
+               {\end@dblfloat}
+
+\def \@floatboxreset{%
+\reset@font
+\footnotesize%\baselineskip16\h
+%\tabcolsep.5zw
+\@setminipage
+}
+
+\def\@floatenv{\let\center\Center}
+
+
+\def\Center{\topsep\z@\parsep\z@\partopsep\z@\itemsep\z@
+ \trivlist \centering\item\relax}
+\def\endCenter{\endtrivlist}
+
+
+
+
+\long\def\@caption#1[#2]#3{\par
+ \begingroup
+  \@parboxrestore
+  \if@minipage
+   \@setminipage
+  \fi
+   \@makecaption{\csname fnum@#1\endcsname}{\ignorespaces #3}\par
+ \endgroup}
+
+
+
+
+
+\newbox\@tempboxb
+\newdimen\capwidth
+\newdimen\ecapwidth
+
+
+
+%%%<<< 1.02
+\long\def\@makecaption#1#2{\footnotesize%
+ \vskip\abovecaptionskip
+ \setbox\@tempboxa\hbox{\footnotesize{\bfseries%
+#1}\hskip1\zw\shortstack[l]{#2}}%
+ \@tempdima\ht\@tempboxa \advance \@tempdima\dp\@tempboxa%
+ \setbox\@tempboxb\hbox{\footnotesize{\bfseries%
+#1}\hskip1\zw}%% <<
+ \ifdim \@tempdima > \baselineskip
+  \ifdim \wd\@tempboxa > \capwidth
+   \hfil\parbox[t]{\capwidth}{\hangindent\wd\@tempboxb 
+{\bfseries%
+    #1}\hskip1\zw #2}\vskip4\@Q
+  \else
+   \hfil\parbox[t]{\wd\@tempboxa}{\hangindent\wd\@tempboxb 
+{\bfseries%
+   #1}\hskip1\zw #2}%\vskip4\@Q
+\par\prevdepth=0pt%
+\vskip-1.5\h%
+  \fi
+ \else %% <
+  \ifdim \wd\@tempboxa > \capwidth
+   \hfil\parbox[t]{\capwidth}{\hangindent\wd\@tempboxb
+{\bfseries%
+    #1}\hskip1\zw #2}%\vskip4\@Q
+%%%
+\ifx \@captype\TABLE
+      \ifDS@english 
+      \par\vskip.25mm%
+      \else
+      \par\prevdepth=0pt\vskip-1.5mm%
+      \fi
+\else
+      \par\prevdepth=0pt\vskip-1.5\h%
+\fi
+%%%
+%  \else
+   \setbox\@tempboxb\hbox{#2}%
+%%
+%   \ifdim \wd\@tempboxb < 4.5\zw %% >
+%    \hbox to\hsize{\hfil  %
+%{\bfseries%
+%#1}\hskip1\zw%\kintou{5\zw}%%
+%{#2}\hfil}%
+%   \else
+    \hbox to\hsize{\hfil\box\@tempboxa\hfil}%
+ \vspace{-\belowcaptionskip}
+%   \fi
+ \fi
+ \vspace{\belowcaptionskip}\par
+}
+
+
+
+
+
+
+
+\long\def\ecaption#1{{\footnotesize%
+ \setbox\@tempboxa\hbox{\footnotesize{\bfseries%
+\csname fnum@e\@captype\endcsname}%
+\hskip1\zw\shortstack[l]{#1}}%
+ \@tempdima\ht\@tempboxa \advance \@tempdima\dp\@tempboxa
+ \setbox\@tempboxb\hbox{\footnotesize{\bfseries%
+\csname fnum@e\@captype\endcsname}\hskip1\zw}%% <<
+%%%%%%%%%%%%
+ \ifdim \@tempdima > \baselineskip
+  \ifdim \wd\@tempboxa > \ecapwidth
+   \hfil\parbox[t]{\ecapwidth}{\hangindent\wd\@tempboxb 
+{\bfseries%
+    \csname fnum@e\@captype\endcsname}\hskip1\zw #1}\par
+  \else
+   \hfil\parbox[t]{\wd\@tempboxa}{\hangindent\wd\@tempboxb 
+{\bfseries%
+    \csname fnum@e\@captype\endcsname}\hskip1\zw #1}\par
+  \fi
+%%%
+ \else %% <
+  \ifdim \wd\@tempboxa > \ecapwidth
+   \hfil\parbox[t]{\ecapwidth}{\hangindent\wd\@tempboxb
+{\bfseries%
+    \csname fnum@e\@captype\endcsname}\hskip1\zw #1}\par
+  \else
+   \hbox to\hsize{\hfil\box\@tempboxa\hfil}%
+  \fi
+ \fi
+}%!!<---
+ \vspace{2\belowcaptionskip}\par
+}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% 参考文献
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% thebibliography
+\renewcommand{\refname}{参考文献}
+
+
+\renewenvironment{thebibliography}[1]
+ {%
+ \fontsize{8.5}{10}\selectfont % 12Qx15H% 11Qx12H
+ \subsection*{\fontsize{9pt}{15pt}\selectfont \textsf{\refname}}%
+\vspace*{2mm}%%
+%\noindent{\bfseries{\refname}}%
+%%%%%%%%%%%%
+\def\@mklab##1{##1\hfil } % 
+%\def\@mklab##1{\hfil ##1}
+%
+   \list{\@biblabel{\@arabic\c@enumiv}}%
+        {\settowidth\labelwidth{\@biblabel{#1}}%
+         \leftmargin\labelwidth
+         \advance\leftmargin\labelsep
+%
+%         
+         \@openbib@code
+         \usecounter{enumiv}%
+         \let\p@enumiv\@empty
+         \renewcommand\theenumiv{\@arabic\c@enumiv}}%
+         \parskip\z@
+	 \topsep\z@\partopsep\z@
+%         \itemsep1\h
+         \parsep\z@
+%         \baselineskip3.5mm
+%
+   \sloppy
+   \clubpenalty\z@
+   \@clubpenalty\clubpenalty
+   \widowpenalty\z@
+   \sfcode`\.\@m
+}
+  {\def\@noitemerr
+    {\@latex@warning{Empty `thebibliography' environment}}%
+   \endlist\unskip}
+%%%%
+\let\@openbib@code\@empty
+
+
+
+\def\acknowledgment{\par
+   {\textsf{謝辞}}%
+\hskip1\zw\ignorespaces%
+}
+
+\usepackage{url}
+\newcommand{\urlj}[1]{\url{#1}}

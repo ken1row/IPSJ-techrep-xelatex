@@ -1,0 +1,1 @@
+xelatex tech-jsample_xela.tex
