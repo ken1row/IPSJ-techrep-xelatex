@@ -1,0 +1,2 @@
+# IPSJ-techrep-xelatex
+情報処理学会研究会原稿をShareLatexなどのXeLaTeX環境で執筆するための疑似スタイルファイル
