@@ -5,9 +5,8 @@
 * 本プロジェクトは，情報処理学会とは無関係です．本スタイルファイルを使用する場合は，自己責任でお願いします．
 * スタイルの正確性は保証していません．提出時は，情処提供クラスファイルを用いてローカルでコンパイルしてください．
 
-## 
 # クイックスタート
- ### ShareLatex での同時共同執筆
+### ShareLatex での同時共同執筆
 1. 以下の4つのファイルをShareLatexにアップロードする．
  * ipag.ttf
  * ipamjm.ttf
@@ -15,19 +14,21 @@
  * tech_jsample_xela.tex
 2. ShareLatex の左上メニューから，コンパイラに XeLaTex を設定する．
  
- ### 提出時 (Windowsの場合)
- 1. tech_jsample_xela.tex をダウンロードし，以下の2行をコメントアウトする．
-```
-\documentclass[a4paper]{article}
-\usepackage{ipsj}
-```
- 2. 以下の行を有効にする．
-```
-\documentclass[submit,techreq,noauthor]{ipsj}
-```
- 3. compile_original.bat をダブルクリックし，コンパイルする．
+### 提出時 (Windowsの場合)
+1. tech_jsample_xela.tex をダウンロードし，以下の2行をコメントアウトする．
 
-## 
+ ```
+ \documentclass[a4paper]{article}
+ \usepackage{ipsj}
+ ```
+2. 以下の行を有効にする．
+
+ ```
+ \documentclass[submit,techreq,noauthor]{ipsj}
+ ```
+3. compile_original.bat をダブルクリックし，コンパイルする．
+
+#その他
 ### 既知の問題
 * レイアウトずれ 
   * 著者名の間のスペース
